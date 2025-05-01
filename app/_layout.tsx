@@ -9,8 +9,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useColorScheme } from "@/components/useColorScheme";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Slot } from "expo-router";
-
+import { PaperProvider } from "react-native-paper";
+import { isLoggedInAtom } from "@/components/GlobalStore";
 import "../global.css";
 
 export {
@@ -28,7 +30,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    SpaceMono: require("../assets/fonts/montserrat.ttf"),
     ...FontAwesome.font,
   });
 
@@ -59,10 +61,16 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <GluestackUIProvider mode={colorScheme === "dark" ? "dark" : "light"}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Slot />
-      </ThemeProvider>
-    </GluestackUIProvider>
+    <PaperProvider>
+      <GluestackUIProvider mode={colorScheme === "dark" ? "dark" : "light"}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <GestureHandlerRootView>
+            <Slot />
+          </GestureHandlerRootView>
+        </ThemeProvider>
+      </GluestackUIProvider>
+    </PaperProvider>
   );
 }
