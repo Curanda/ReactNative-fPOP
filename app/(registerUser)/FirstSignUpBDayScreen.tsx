@@ -1,5 +1,4 @@
 import { View, Text, TextInput, Image, SafeAreaView } from "react-native";
-import { useState } from "react";
 import GradientButton from "../../components/GradientButton";
 import InactiveGradientButton from "../../components/InactiveGradientButton";
 import { useRouter } from "expo-router";
@@ -7,8 +6,7 @@ import { ShadowView } from "../../components/ShadowView";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useSetAtom, useAtomValue } from "jotai";
-import { nameAtom, bdayAtom, dummyUser } from "../../components/GlobalStore";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { dummyUser, phoneNumberAtom } from "../../components/GlobalStore";
 import { Box } from "@/components/ui/box";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 
@@ -22,9 +20,9 @@ const nameSchema = Yup.object({
 });
 
 export default function FirstSignUpBDayScreen() {
-  const users = useAtomValue(dummyUser);
-  const setName = useSetAtom(nameAtom);
-  const setBday = useSetAtom(bdayAtom);
+  const phoneNumber = useAtomValue(phoneNumberAtom);
+  const setUserDetails = useSetAtom(dummyUser);
+
   const router = useRouter();
 
   const formatDate = (date: Date) => {
@@ -37,10 +35,14 @@ export default function FirstSignUpBDayScreen() {
   function handleSubmit(values: { name: string; bday: string }) {
     console.log("handleSubmit called");
     try {
-      setName(values.name);
-      setBday(values.bday);
-      console.log("Name:", values.name);
-      console.log("Birthday:", values.bday);
+      setUserDetails((prev) => ({
+        ...prev,
+        [phoneNumber]: {
+          ...prev[phoneNumber],
+          name: values.name,
+          bday: values.bday,
+        },
+      }));
       router.push("/(registerUser)/InitialPreferencesScreen");
     } catch (error) {
       console.error("Error in handleSubmit:", error);

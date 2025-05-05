@@ -17,9 +17,9 @@ import { useSetAtom, useAtomValue } from "jotai";
 import {
   emailAtom,
   dummyUser,
-  isPhoneValidAtom,
   phoneNumberAtom,
-  isSetCreateUserAtom,
+  User,
+  Users,
 } from "../../components/GlobalStore";
 import { CountryPicker } from "react-native-country-codes-picker";
 import { Box } from "@/components/ui/box";
@@ -42,10 +42,9 @@ const emailSchema = Yup.object({
 export default function FirstSignUpEmailScreen() {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+1");
-  const setIsPhoneValid = useSetAtom(isPhoneValidAtom);
   const setPhoneNumber = useSetAtom(phoneNumberAtom);
   const users = useAtomValue(dummyUser);
-  const setCreateUser = useSetAtom(isSetCreateUserAtom);
+  const createNewUser = useSetAtom(dummyUser);
   const setEmail = useSetAtom(emailAtom);
 
   function handleSubmit(
@@ -60,6 +59,19 @@ export default function FirstSignUpEmailScreen() {
       setFieldError("phone", "Phone number already exists");
     } else {
       setPhoneNumber(phoneNumber);
+      const newUser: User = {
+        id: 0,
+        email: values.email,
+        phone: phoneNumber,
+        name: "",
+        bday: "",
+        password: "",
+        chosenDefaultPreferences: [],
+        definedCustomPreferences: [],
+        starredMovies: [],
+        profilePicture: "",
+      };
+      createNewUser((prev) => ({ ...prev, [phoneNumber]: newUser }));
       router.push("/(registerUser)/FirstSignUpBDayScreen");
     }
   }

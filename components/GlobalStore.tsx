@@ -11,14 +11,15 @@ export const preferencesAtom = atom([]);
 export const emailAtom = atom("");
 export const nameAtom = atom("");
 export const bdayAtom = atom("");
-export const dummyUser = atom({
+export const dummyUser = atom<Users>({
   "001234567890": {
     id: 1,
     name: "John Doe",
     email: "john@doe.com",
     phone: "001234567890",
     password: "password",
-    preferences: ["action", "adventure", "comedy"],
+    chosenDefaultPreferences: ["action", "adventure", "comedy"],
+    definedCustomPreferences: [],
     starredMovies: ["The Dark Knight", "Inception", "The Matrix"],
     profilePicture:
       "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.pngfind.com%2Fpngs%2Fm%2F610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png&f=1&nofb=1&ipt=d42742362f627ab50378d1c50487e256c046c11cca1ba05c36ad52cae9a59192",
@@ -54,3 +55,25 @@ export const defaultPreferencesAtom = atom([
 ]);
 
 export const userPreferencesAtom = atom<string[]>([]);
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  chosenDefaultPreferences: string[];
+  definedCustomPreferences: string[];
+  starredMovies: string[];
+  profilePicture: string;
+  bday: string;
+};
+
+export type Users = {
+  [key: string]: User;
+};
+
+export const setUserDetailsAtom = atom(null, (get, set, newUser: User) => {
+  const users = get(dummyUser);
+  users[newUser.phone] = newUser;
+  set(dummyUser, users);
+});

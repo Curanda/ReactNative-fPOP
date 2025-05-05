@@ -15,7 +15,7 @@ import ChipAddPreference from "@/components/ChipAddPreference";
 import { VStack } from "@/components/ui/vstack";
 import { Box } from "@/components/ui/box";
 import { useAtom } from "jotai";
-import { dummyUser } from "@/components/GlobalStore";
+import { dummyUser, phoneNumberAtom } from "@/components/GlobalStore";
 import { ArchDivider } from "@/assets/arch-divider";
 import { Center } from "@/components/ui/center";
 import { HStack } from "@/components/ui/hstack";
@@ -32,8 +32,9 @@ const defaultProfilePicture =
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.pngfind.com%2Fpngs%2Fm%2F610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png&f=1&nofb=1&ipt=d42742362f627ab50378d1c50487e256c046c11cca1ba05c36ad52cae9a59192";
 
 export default function ProfileScreen() {
-  const [user] = useAtom(dummyUser);
-  const userData = user["001234567890"];
+  const phoneNumber = useAtomValue(phoneNumberAtom);
+  const userData = useAtomValue(dummyUser)[phoneNumber];
+
   const userAge =
     new Date().getFullYear() - new Date(userData.bday).getFullYear();
 
@@ -362,10 +363,14 @@ export default function ProfileScreen() {
                             selectedColor="black"
                             showSelectedCheck={true}
                             elevated={true}
-                            selected={userPreferences.includes(preference)}
+                            selected={userData.chosenDefaultPreferences.includes(
+                              preference
+                            )}
                             onPress={() => handleTogglePreference(preference)}
                             style={
-                              userPreferences.includes(preference)
+                              userData.chosenDefaultPreferences.includes(
+                                preference
+                              )
                                 ? { backgroundColor: "#88C0AC" }
                                 : { backgroundColor: "#F1C051" }
                             }
@@ -373,7 +378,7 @@ export default function ProfileScreen() {
                             {preference}
                           </Chip>
                         ))}
-                        {customPreferences.map((preference) => (
+                        {userData.definedCustomPreferences.map((preference) => (
                           <Chip
                             key={preference}
                             mode="outlined"

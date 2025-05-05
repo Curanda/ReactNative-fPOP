@@ -16,12 +16,16 @@ import GradientButton from "@/components/GradientButton";
 import {
   defaultPreferencesAtom,
   userPreferencesAtom,
+  dummyUser,
+  phoneNumberAtom,
 } from "@/components/GlobalStore";
 import { useAtomValue, useSetAtom } from "jotai";
 
 export default function InitialPreferencesScreen() {
+  const phoneNumber = useAtomValue(phoneNumberAtom);
   const defaultPreferences = useAtomValue(defaultPreferencesAtom);
   const setUserPreferencesAtom = useSetAtom(userPreferencesAtom);
+  const setUserDetailsAtom = useSetAtom(dummyUser);
   const [userPreferences, setUserPreferences] = useState<string[]>([]);
   const [newPreference, setNewPreference] = useState<string>("");
   const [customPreferences, setCustomPreferences] = useState<string[]>([]);
@@ -39,7 +43,14 @@ export default function InitialPreferencesScreen() {
   }
 
   const handleFinalize = () => {
-    setUserPreferencesAtom([...userPreferences, ...customPreferences]);
+    setUserDetailsAtom((prev) => ({
+      ...prev,
+      [phoneNumber]: {
+        ...prev[phoneNumber],
+        chosenDefaultPreferences: [...userPreferences],
+        definedCustomPreferences: [...customPreferences],
+      },
+    }));
     console.log("chosen preferences:", userPreferences, customPreferences);
     router.navigate("/(actionTabs)/ProfileScreen");
   };
