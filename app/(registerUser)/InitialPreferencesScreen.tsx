@@ -1,4 +1,13 @@
-import { View, Text, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import { router } from "expo-router";
 import { Chip } from "react-native-paper";
 import ChipAddPreference from "@/components/ChipAddPreference";
@@ -50,53 +59,60 @@ export default function InitialPreferencesScreen() {
   }, [newPreference]);
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="flex-1 p-4">
-        <Text className="text-2xl font-bold text-black mb-4">
-          Select your preferences :
-        </Text>
-        <View className="flex-row flex-wrap gap-2 mb-4">
-          {defaultPreferences.map((preference) => (
-            <Chip
-              key={preference}
-              mode="outlined"
-              selectedColor="black"
-              showSelectedCheck={true}
-              elevated={true}
-              selected={userPreferences.includes(preference)}
-              onPress={() => handleTogglePreference(preference)}
-              style={
-                userPreferences.includes(preference)
-                  ? { backgroundColor: "#88C0AC" }
-                  : { backgroundColor: "#F1C051" }
-              }
-            >
-              {preference}
-            </Chip>
-          ))}
-          {customPreferences.map((preference) => (
-            <Chip
-              key={preference}
-              mode="outlined"
-              selectedColor="black"
-              icon="close"
-              elevated={true}
-              onPress={() => handleDeleteCustomPreference(preference)}
-              style={{ backgroundColor: "#88C0AC" }}
-            >
-              {preference}
-            </Chip>
-          ))}
-          <ChipAddPreference onSetNewPreference={setNewPreference} />
-        </View>
-        <View className="flex-1 w-3/5 items-center justify-start mt-4">
-          <GradientButton onPress={handleFinalize}>
-            <Text className="text-3xl font-bold tracking-widest text-white">
-              Finalize
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView className="flex-1 bg-white">
+          <ScrollView className="p-10">
+            <Text className="text-2xl font-bold text-black mb-4">
+              Select your preferences :
             </Text>
-          </GradientButton>
-        </View>
-      </View>
-    </ScrollView>
+            <View className="flex-row flex-wrap gap-2 mb-4">
+              {defaultPreferences.map((preference) => (
+                <Chip
+                  key={preference}
+                  mode="outlined"
+                  selectedColor="black"
+                  showSelectedCheck={true}
+                  elevated={true}
+                  selected={userPreferences.includes(preference)}
+                  onPress={() => handleTogglePreference(preference)}
+                  style={
+                    userPreferences.includes(preference)
+                      ? { backgroundColor: "#88C0AC" }
+                      : { backgroundColor: "#F1C051" }
+                  }
+                >
+                  {preference}
+                </Chip>
+              ))}
+              {customPreferences.map((preference) => (
+                <Chip
+                  key={preference}
+                  mode="outlined"
+                  selectedColor="black"
+                  icon="close"
+                  elevated={true}
+                  onPress={() => handleDeleteCustomPreference(preference)}
+                  style={{ backgroundColor: "#88C0AC" }}
+                >
+                  {preference}
+                </Chip>
+              ))}
+              <ChipAddPreference onSetNewPreference={setNewPreference} />
+            </View>
+            <View className="flex-1 w-3/5 items-center justify-start mt-4">
+              <GradientButton onPress={handleFinalize}>
+                <Text className="text-3xl font-bold tracking-widest text-white">
+                  Finalize
+                </Text>
+              </GradientButton>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

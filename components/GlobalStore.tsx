@@ -20,7 +20,8 @@ export const dummyUser = atom({
     password: "password",
     preferences: ["action", "adventure", "comedy"],
     starredMovies: ["The Dark Knight", "Inception", "The Matrix"],
-    profilePicture: "https://via.placeholder.com/150",
+    profilePicture:
+      "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.pngfind.com%2Fpngs%2Fm%2F610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png&f=1&nofb=1&ipt=d42742362f627ab50378d1c50487e256c046c11cca1ba05c36ad52cae9a59192",
     bday: "1990-01-01",
   },
 });

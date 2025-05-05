@@ -1,9 +1,10 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from "expo-router";
+import React from "react";
 
 export default function ActionTabs() {
   return (
-    <Tabs>
-      <Tabs.Screen name="ActionScreen" />
-    </Tabs>
+    <>
+      <Redirect href="/(actionTabs)/ActionScreen" />
+    </>
   );
 }

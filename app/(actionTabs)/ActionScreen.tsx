@@ -15,6 +15,7 @@ import SvgRefresh from "../../assets/Icons/SvgRefresh";
 import SvgStar from "../../assets/Icons/SvgStar";
 import SvgHeart from "../../assets/Icons/SvgHeart";
 import { Box } from "@/components/ui/box";
+import SvgSaveCard from "../../assets/Icons/SvgSaveCard";
 const IMAGES: ImageSourcePropType[] = [
   require("../../assets/images/dummy1.png"),
   require("../../assets/images/dummy2.png"),
@@ -142,7 +143,7 @@ export default function ActionScreen() {
               ref.current?.swipeTop();
             }}
           >
-            <SvgStar width={32} height={32} fill="#26A9FF" />
+            <SvgSaveCard width={32} height={32} fill="#26A9FF" />
           </ActionButton>
           <ActionButton
             style={styles.button}

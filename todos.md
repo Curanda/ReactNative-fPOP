@@ -8,3 +8,5 @@ Tabele:
 6. verification_codes
 7. user_sessions
 8. movie_providers
+9. genders
+10.

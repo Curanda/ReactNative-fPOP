@@ -10,9 +10,10 @@ import { useEffect, useState } from "react";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useColorScheme } from "@/components/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import { PaperProvider } from "react-native-paper";
 import { isLoggedInAtom } from "@/components/GlobalStore";
+import { Image, View, Text } from "react-native";
 import "../global.css";
 
 export {
@@ -66,8 +67,41 @@ function RootLayoutNav() {
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
-          <GestureHandlerRootView>
-            <Slot />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                headerShadowVisible: false,
+                headerStyle: {
+                  backgroundColor: colorScheme === "dark" ? "#000" : "#fff",
+                },
+                headerTitle: () =>
+                  colorScheme !== "dark" ? (
+                    <Image
+                      className="mt-4"
+                      source={require("../assets/images/popFireBlack.png")}
+                      style={{ width: 120, height: 40, resizeMode: "contain" }}
+                    />
+                  ) : (
+                    <View className="flex-row justify-center items-center mt-4">
+                      <Image
+                        source={require("../assets/images/popFireLogo.png")}
+                        style={{
+                          width: 50,
+                          height: 50,
+                          resizeMode: "contain",
+                        }}
+                      />
+                      <Text className="text-3xl font-bold text-white">
+                        firePOP
+                      </Text>
+                    </View>
+                  ),
+                headerTitleAlign: "center",
+              }}
+            >
+              <Slot />
+            </Stack>
           </GestureHandlerRootView>
         </ThemeProvider>
       </GluestackUIProvider>
