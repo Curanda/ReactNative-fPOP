@@ -7,27 +7,23 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useState } from "react";
-import GradientButton from "../../components/GradientButton";
-import InactiveGradientButton from "../../components/InactiveGradientButton";
+import { useSetAtom } from "jotai";
 import { router } from "expo-router";
-import { ShadowView } from "../../components/ShadowView";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useSetAtom, useAtomValue } from "jotai";
-import {
-  emailAtom,
-  dummyUser,
-  phoneNumberAtom,
-  User,
-  Users,
-} from "../../components/GlobalStore";
 import { CountryPicker } from "react-native-country-codes-picker";
 import { Box } from "@/components/ui/box";
-
-const emailRegex =
-  /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
-
-const phoneRegExp = /^(\d{3,5}[-\.\s]?\d{4})$/;
+import GradientButton from "../../components/GradientButton";
+import InactiveGradientButton from "../../components/InactiveGradientButton";
+import { ShadowView } from "../../components/ShadowView";
+import {
+  phoneNumberAtom,
+  User,
+  newUserAtom,
+  fetchUserByIdAtom,
+  emailRegex,
+  phoneRegex,
+} from "../../components/GlobalStore";
 
 const emailSchema = Yup.object({
   email: Yup.string()
@@ -35,7 +31,7 @@ const emailSchema = Yup.object({
     .required("Email is required"),
 
   phone: Yup.string()
-    .matches(phoneRegExp, "Phone number is invalid")
+    .matches(phoneRegex, "Phone number is invalid")
     .required("Phone number is required"),
 });
 
@@ -43,35 +39,47 @@ export default function FirstSignUpEmailScreen() {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+1");
   const setPhoneNumber = useSetAtom(phoneNumberAtom);
-  const users = useAtomValue(dummyUser);
-  const createNewUser = useSetAtom(dummyUser);
-  const setEmail = useSetAtom(emailAtom);
+  const createNewUser = useSetAtom(newUserAtom);
+  const fetchUser = useSetAtom(fetchUserByIdAtom);
 
-  function handleSubmit(
+  async function handleSubmit(
     values: { email: string; phone: string },
     {
       setFieldError,
     }: { setFieldError: (field: string, message: string) => void }
   ) {
-    setEmail(values.email);
-    let phoneNumber = (countryCode + values.phone).replace("+", "00");
-    if (phoneNumber in users) {
+    let phoneNumber = (countryCode + values.phone).replace("+", "");
+
+    const user = await fetchUser(phoneNumber);
+
+    if (user) {
       setFieldError("phone", "Phone number already exists");
     } else {
       setPhoneNumber(phoneNumber);
       const newUser: User = {
-        id: 0,
+        id: Number(phoneNumber),
         email: values.email,
         phone: phoneNumber,
         name: "",
-        bday: "",
+        birthday: "",
         password: "",
         chosenDefaultPreferences: [],
-        definedCustomPreferences: [],
+        userDefinedPreferences: [],
         starredMovies: [],
         profilePicture: "",
+        gender: "",
+        favoriteDirectors: [],
+        favoriteActors: [],
+        religion: "",
+        countryOfBirth: "",
+        countryOfResidence: "",
+        politicalOrientation: "",
+        sexualOrientation: "",
+        firstLanguage: "",
+        secondLanguage: "",
+        favoriteAnimal: "",
       };
-      createNewUser((prev) => ({ ...prev, [phoneNumber]: newUser }));
+      createNewUser(newUser);
       router.push("/(registerUser)/FirstSignUpBDayScreen");
     }
   }

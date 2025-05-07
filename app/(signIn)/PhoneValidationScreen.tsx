@@ -15,6 +15,8 @@ import {
   isPhoneValidAtom,
   phoneNumberAtom,
   isSetCreateUserAtom,
+  fetchUserByIdAtom,
+  validUserAtom,
 } from "../../components/GlobalStore";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -37,16 +39,18 @@ export default function PhoneValidationScreen() {
   const setPhoneNumber = useSetAtom(phoneNumberAtom);
   const users = useAtomValue(dummyUser);
   const setCreateUser = useSetAtom(isSetCreateUserAtom);
+  const fetchUser = useSetAtom(fetchUserByIdAtom);
   const router = useRouter();
 
-  function handleSubmit(
+  async function handleSubmit(
     values: { phone: string },
     {
       setFieldError,
     }: { setFieldError: (field: string, message: string) => void }
   ) {
-    let phoneNumber = (countryCode + values.phone).replace("+", "00");
-    if (phoneNumber in users) {
+    let phoneNumber = (countryCode + values.phone).replace("+", "");
+    const isUserValid = await fetchUser(phoneNumber);
+    if (isUserValid) {
       setIsPhoneValid(true);
       setPhoneNumber(phoneNumber);
       router.push("/PhoneCodeSubmitScreen");

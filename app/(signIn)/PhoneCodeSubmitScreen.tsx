@@ -2,10 +2,17 @@ import { Text, TextInput, View, Image } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native";
 import GradientButton from "../../components/GradientButton";
-import { useSetAtom } from "jotai";
-import { isCodeValidAtom, codeAtom } from "../../components/GlobalStore";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  isCodeValidAtom,
+  codeAtom,
+  fetchDefaultCategoriesAtom,
+  defaultPreferencesAtom,
+} from "../../components/GlobalStore";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { router } from "expo-router";
+import React from "react";
 
 const codeSchema = Yup.object({
   code: Yup.array()
@@ -14,15 +21,10 @@ const codeSchema = Yup.object({
 });
 
 export default function PhoneCodeSubmitScreen() {
-  const setIsCodeValid = useSetAtom(isCodeValidAtom);
-  const setCode = useSetAtom(codeAtom);
-
   function handleSubmit(values: { code: string[] }) {
-    setIsCodeValid(values.code.join("") === "1234");
     if (values.code.join("") === "1234") {
-      setCode(values.code.join(""));
+      router.navigate("/(actionTabs)/ProfileScreen");
     }
-    console.log(values.code.join(""));
   }
 
   return (

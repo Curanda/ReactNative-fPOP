@@ -1,29 +1,30 @@
 import { View, Text, TextInput, Image, SafeAreaView } from "react-native";
-import GradientButton from "../../components/GradientButton";
-import InactiveGradientButton from "../../components/InactiveGradientButton";
 import { useRouter } from "expo-router";
-import { ShadowView } from "../../components/ShadowView";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useSetAtom, useAtomValue } from "jotai";
-import { dummyUser, phoneNumberAtom } from "../../components/GlobalStore";
-import { Box } from "@/components/ui/box";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
+import { Box } from "@/components/ui/box";
+import GradientButton from "../../components/GradientButton";
+import InactiveGradientButton from "../../components/InactiveGradientButton";
+import { ShadowView } from "../../components/ShadowView";
+import { useSetAtom, useAtomValue } from "jotai";
+import {
+  fetchDefaultCategoriesAtom,
+  nameRegex,
+  newUserAtom,
+} from "../../components/GlobalStore";
 
-const nameRegex =
-  /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
 const nameSchema = Yup.object({
   name: Yup.string()
     .matches(nameRegex, "Name is invalid")
     .required("Name is required"),
-  bday: Yup.string().required("Birthday is required"),
+  birthday: Yup.string().required("Birthday is required"),
 });
 
 export default function FirstSignUpBDayScreen() {
-  const phoneNumber = useAtomValue(phoneNumberAtom);
-  const setUserDetails = useSetAtom(dummyUser);
-
+  const setUserDetails = useSetAtom(newUserAtom);
   const router = useRouter();
+  const fetchDefaultCategories = useSetAtom(fetchDefaultCategoriesAtom);
 
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
@@ -32,27 +33,23 @@ export default function FirstSignUpBDayScreen() {
     return `${year}-${month}-${day}`;
   };
 
-  function handleSubmit(values: { name: string; bday: string }) {
-    console.log("handleSubmit called");
-    try {
-      setUserDetails((prev) => ({
+  function handleSubmit(values: { name: string; birthday: string }) {
+    fetchDefaultCategories();
+    setUserDetails((prev) => {
+      if (!prev) return null;
+      return {
         ...prev,
-        [phoneNumber]: {
-          ...prev[phoneNumber],
-          name: values.name,
-          bday: values.bday,
-        },
-      }));
-      router.push("/(registerUser)/InitialPreferencesScreen");
-    } catch (error) {
-      console.error("Error in handleSubmit:", error);
-    }
+        name: values.name,
+        birthday: values.birthday,
+      };
+    });
+    router.push("/(registerUser)/InitialPreferencesScreen");
   }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Formik
-        initialValues={{ name: "", bday: "" }}
+        initialValues={{ name: "", birthday: "" }}
         validationSchema={nameSchema}
         onSubmit={handleSubmit}
         validateOnChange={true}
@@ -104,7 +101,9 @@ export default function FirstSignUpBDayScreen() {
                   <RNDateTimePicker
                     mode="date"
                     display="default"
-                    value={values.bday ? new Date(values.bday) : new Date()}
+                    value={
+                      values.birthday ? new Date(values.birthday) : new Date()
+                    }
                     onChange={(event, date) => {
                       if (date) {
                         handleChange("bday")(formatDate(date));

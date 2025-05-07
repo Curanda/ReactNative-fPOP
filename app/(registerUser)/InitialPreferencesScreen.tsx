@@ -9,29 +9,21 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { router } from "expo-router";
+import { useState, useEffect } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Chip } from "react-native-paper";
 import ChipAddPreference from "@/components/ChipAddPreference";
-import { useState, useEffect } from "react";
 import GradientButton from "@/components/GradientButton";
-import {
-  defaultPreferencesAtom,
-  userPreferencesAtom,
-  dummyUser,
-  phoneNumberAtom,
-} from "@/components/GlobalStore";
-import { useAtomValue, useSetAtom } from "jotai";
+import { defaultPreferencesAtom, newUserAtom } from "@/components/GlobalStore";
 
 export default function InitialPreferencesScreen() {
-  const phoneNumber = useAtomValue(phoneNumberAtom);
   const defaultPreferences = useAtomValue(defaultPreferencesAtom);
-  const setUserPreferencesAtom = useSetAtom(userPreferencesAtom);
-  const setUserDetailsAtom = useSetAtom(dummyUser);
+  const setUserDetailsAtom = useSetAtom(newUserAtom);
   const [userPreferences, setUserPreferences] = useState<string[]>([]);
   const [newPreference, setNewPreference] = useState<string>("");
   const [customPreferences, setCustomPreferences] = useState<string[]>([]);
 
   function handleTogglePreference(preference: string) {
-    console.log(preference);
     if (userPreferences.includes(preference)) {
       setUserPreferences((prevPreferences) =>
         prevPreferences.filter((p) => p !== preference)
@@ -39,19 +31,17 @@ export default function InitialPreferencesScreen() {
     } else {
       setUserPreferences((prevPreferences) => [...prevPreferences, preference]);
     }
-    console.log("preferences updated:", userPreferences);
   }
 
   const handleFinalize = () => {
-    setUserDetailsAtom((prev) => ({
-      ...prev,
-      [phoneNumber]: {
-        ...prev[phoneNumber],
+    setUserDetailsAtom((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
         chosenDefaultPreferences: [...userPreferences],
-        definedCustomPreferences: [...customPreferences],
-      },
-    }));
-    console.log("chosen preferences:", userPreferences, customPreferences);
+        userDefinedPreferences: [...customPreferences],
+      };
+    });
     router.navigate("/(actionTabs)/ProfileScreen");
   };
 
