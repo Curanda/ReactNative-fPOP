@@ -8,6 +8,7 @@ import {
   codeAtom,
   fetchDefaultCategoriesAtom,
   defaultPreferencesAtom,
+  validUserAtom,
 } from "../../components/GlobalStore";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -21,7 +22,12 @@ const codeSchema = Yup.object({
 });
 
 export default function PhoneCodeSubmitScreen() {
+  const validUser = useAtomValue(validUserAtom);
   function handleSubmit(values: { code: string[] }) {
+    if (validUser?.chosenDefaultPreferences === null) {
+      validUser.chosenDefaultPreferences = [];
+    }
+
     if (values.code.join("") === "1234") {
       router.navigate("/(actionTabs)/ProfileScreen");
     }

@@ -15,7 +15,12 @@ import { List, Divider, Card, Chip } from "react-native-paper";
 import ChipAddPreference from "@/components/ChipAddPreference";
 import { VStack } from "@/components/ui/vstack";
 import { Box } from "@/components/ui/box";
-import { validUserAtom, User } from "@/components/GlobalStore";
+import {
+  validUserAtom,
+  User,
+  isUserCreatedAtom,
+  newUserAtom,
+} from "@/components/GlobalStore";
 import { ArchDivider } from "@/assets/arch-divider";
 import { Center } from "@/components/ui/center";
 import { HStack } from "@/components/ui/hstack";
@@ -28,12 +33,19 @@ import {
   fetchDefaultCategoriesAtom,
 } from "@/components/GlobalStore";
 import { useAtomValue, useSetAtom } from "jotai";
+import { updateUser } from "@/utilities/api-functions";
 
 const defaultProfilePicture =
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.pngfind.com%2Fpngs%2Fm%2F610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png&f=1&nofb=1&ipt=d42742362f627ab50378d1c50487e256c046c11cca1ba05c36ad52cae9a59192";
 
 export default function ProfileScreen() {
-  const userData = useAtomValue(validUserAtom);
+  const userData = useAtomValue(isUserCreatedAtom)
+    ? useAtomValue(newUserAtom)
+    : useAtomValue(validUserAtom);
+
+  const setUserData = useAtomValue(isUserCreatedAtom)
+    ? useSetAtom(newUserAtom)
+    : useSetAtom(validUserAtom);
   const fetchDefaultCategories = useSetAtom(fetchDefaultCategoriesAtom);
 
   useEffect(() => {
@@ -52,6 +64,17 @@ export default function ProfileScreen() {
   if (userData && userData.profilePicture === null) {
     userData.profilePicture = defaultProfilePicture;
   }
+
+  useEffect(() => {
+    if (userData) {
+      try {
+        const res = updateUser(userData);
+        console.log("User update result:", res);
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
+    }
+  }, [userData]);
 
   // ------------------------------------------------------------ PREFERENCES
 
@@ -107,7 +130,16 @@ export default function ProfileScreen() {
 
   const submitEdit = () => {
     if (editing && editedValue !== "") {
-      (userData as any)[editing] = editedValue;
+      console.log("Updating user data:", { editing, editedValue });
+      setUserData((prev) => {
+        if (!prev) return null;
+        const updated = {
+          ...prev,
+          [editing]: editedValue,
+        } as User;
+        console.log("New user data:", updated);
+        return updated;
+      });
     }
     setEditing("");
     setEditedValue("");
@@ -126,7 +158,9 @@ export default function ProfileScreen() {
                 <Box className="flex justify-center items-center relative">
                   <Image
                     alt="Profile Picture"
-                    source={{ uri: userData?.profilePicture || "" }}
+                    source={{
+                      uri: userData?.profilePicture || defaultProfilePicture,
+                    }}
                     className="w-32 h-32 rounded-full border border-gray-500"
                   />
                   <Button
@@ -155,9 +189,10 @@ export default function ProfileScreen() {
                       value={editedValue}
                       returnKeyType="done"
                     />
+                    ///111111111
                     <View className="flex-row justify-center items-center">
                       <Button
-                        onTouchStart={submitEdit}
+                        onTouchStart={() => submitEdit}
                         className="rounded-full px-[5px] ml-2 bg-white border border-black"
                       >
                         <Feather name="check" size={24} color="black" />
@@ -244,14 +279,7 @@ export default function ProfileScreen() {
                         </Button>
                       </HStack>
                     )}
-                    <Divider
-                      style={{
-                        height: 1,
-                        width: 300,
-                        backgroundColor: "black",
-                        padding: 0,
-                      }}
-                    />
+                    <Divider c />
                     {editing === "phone" ? (
                       <HStack className="gap-4 items-center justify-between py-4 pl-4">
                         <TextInput

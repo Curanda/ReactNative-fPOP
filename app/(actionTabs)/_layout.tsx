@@ -4,6 +4,8 @@ import Octicons from "@expo/vector-icons/Octicons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function TabLayout() {
+  ////////////////////
+
   return (
     <Tabs
       screenOptions={{
@@ -15,6 +17,7 @@ export default function TabLayout() {
           paddingTop: 10,
         },
       }}
+      initialRouteName="ActionScreen"
     >
       <Tabs.Screen
         name="ActionScreen"

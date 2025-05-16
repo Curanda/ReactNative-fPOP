@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { ShadowView } from "../../components/ShadowView";
 import { CountryPicker } from "react-native-country-codes-picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GradientButton from "../../components/GradientButton";
 import { useSetAtom, useAtomValue } from "jotai";
 import {
@@ -17,12 +17,14 @@ import {
   isSetCreateUserAtom,
   fetchUserByIdAtom,
   validUserAtom,
+  defaultCategoriesAtom,
+  isDefaultCategoriesFetchedAtom,
 } from "../../components/GlobalStore";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import InactiveGradientButton from "../../components/InactiveGradientButton";
-import { dummyUser } from "../../components/GlobalStore";
 import { useRouter } from "expo-router";
+import axios from "axios";
 
 const phoneRegExp = /^(\d{3,5}[-\.\s]?\d{4})$/;
 
@@ -37,10 +39,28 @@ export default function PhoneValidationScreen() {
   const [countryCode, setCountryCode] = useState("+1");
   const setIsPhoneValid = useSetAtom(isPhoneValidAtom);
   const setPhoneNumber = useSetAtom(phoneNumberAtom);
-  const users = useAtomValue(dummyUser);
-  const setCreateUser = useSetAtom(isSetCreateUserAtom);
-  const fetchUser = useSetAtom(fetchUserByIdAtom);
+  const setValidUser = useSetAtom(validUserAtom);
   const router = useRouter();
+  const setDefaultCategories = useSetAtom(defaultCategoriesAtom);
+  const setIsDefaultCategoriesFetched = useSetAtom(
+    isDefaultCategoriesFetchedAtom
+  );
+  useEffect(() => {
+    const fetchDefaultCategories = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5013/api/DefaultCategory"
+        );
+        const data = res.data;
+        const categories = data.map((category: any) => category.name);
+        setDefaultCategories(categories);
+        setIsDefaultCategoriesFetched(true);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchDefaultCategories();
+  }, []);
 
   async function handleSubmit(
     values: { phone: string },
@@ -49,12 +69,19 @@ export default function PhoneValidationScreen() {
     }: { setFieldError: (field: string, message: string) => void }
   ) {
     let phoneNumber = (countryCode + values.phone).replace("+", "");
-    const isUserValid = await fetchUser(phoneNumber);
-    if (isUserValid) {
-      setIsPhoneValid(true);
-      setPhoneNumber(phoneNumber);
-      router.push("/PhoneCodeSubmitScreen");
-    } else {
+    try {
+      const res = await axios.get(
+        `http://localhost:5013/api/User/phone/${phoneNumber}`
+      );
+      if (res.status === 200) {
+        setIsPhoneValid(true);
+        setPhoneNumber(phoneNumber.toString());
+        setValidUser(res.data);
+        router.push("/PhoneCodeSubmitScreen");
+      } else {
+        setFieldError("phone", `${res.statusText}`);
+      }
+    } catch (error) {
       setFieldError("phone", "Phone number does not exist");
     }
   }

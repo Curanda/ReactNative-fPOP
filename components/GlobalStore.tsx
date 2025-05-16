@@ -1,4 +1,5 @@
-import { atom } from "jotai";
+import axios from "axios";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 
 export const isPhoneValidAtom = atom(false);
 export const isCodeValidAtom = atom(false);
@@ -8,38 +9,16 @@ export const isSetCreateUserAtom = atom(false);
 export const isLoggedInAtom = atom(false);
 export const isDarkModeAtom = atom(false);
 export const preferencesAtom = atom<string[]>([]);
+export const defaultCategoriesAtom = atom<string[]>([]);
 export const isDefaultCategoriesFetchedAtom = atom(false);
 export const validUserAtom = atom<User | null>(null);
+export const isUserCreatedAtom = atom(false);
 export const emailRegex =
   /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
 export const phoneRegex = /^(\d{3,5}[-\.\s]?\d{4})$/;
 export const nameRegex =
-  /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u;
-export const dummyUser = atom<Users>({
-  "001234567890": {
-    id: 1234567890,
-    name: "John Doe",
-    email: "john@doe.com",
-    phone: "001234567890",
-    password: "password",
-    chosenDefaultPreferences: ["action", "adventure", "comedy"],
-    userDefinedPreferences: null,
-    starredMovies: ["The Dark Knight", "Inception", "The Matrix"],
-    profilePicture: null,
-    birthday: "1990-01-01T00:00:00",
-    gender: null,
-    favoriteDirectors: null,
-    favoriteActors: null,
-    religion: null,
-    countryOfBirth: null,
-    countryOfResidence: null,
-    politicalOrientation: null,
-    sexualOrientation: null,
-    firstLanguage: "english",
-    secondLanguage: null,
-    favoriteAnimal: null,
-  },
-});
+  /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžæČŠŽ∂ð ,.'-]+$/u;
+// export const isTabChangeAtom = atom<number[]>([1]);
 
 export const newUserAtom = atom<User | null>(null);
 
@@ -71,9 +50,26 @@ export const defaultPreferencesAtom = atom<string[]>([
   "adult",
 ]);
 
+export const dropDownOptionsAtom = atom<{
+  animals: string[];
+  countries: string[];
+  religions: string[];
+  sexualOrientations: string[];
+  politicalOrientations: string[];
+  genders: string[];
+  languages: string[];
+}>({
+  animals: [],
+  countries: [],
+  religions: [],
+  sexualOrientations: [],
+  politicalOrientations: [],
+  genders: [],
+  languages: [],
+});
+
 export const userPreferencesAtom = atom<string[]>([]);
 export type User = {
-  id: number;
   name: string;
   email: string;
   phone: string;
@@ -101,32 +97,116 @@ export type Users = {
 };
 
 export const setUserDetailsAtom = atom(null, (get, set, newUser: User) => {
-  const users = get(dummyUser);
-  users[newUser.phone] = newUser;
-  set(dummyUser, users);
+  const user = get(newUserAtom);
+  if (!user) return;
+  set(newUserAtom, user);
 });
+
+///////////////// USER API CALLS //////////////////
 
 export const fetchUserByIdAtom = atom(null, async (get, set, id: string) => {
   try {
-    const res = await fetch(`http://localhost:5013/api/User/${Number(id)}`, {
-      method: "GET",
+    const res = await axios.get(`http://localhost:5013/api/${id}`, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
     });
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    if (res.status === 404) {
+      return false;
     }
-    const data = await res.json();
+    const data = res.data;
     set(validUserAtom, data);
-    console.log(data);
+    console.log("User fetched successfully:", data);
     return true;
   } catch (error) {
     console.error("Error fetching user:", error);
     return false;
   }
 });
+
+// export const postUserAtom = atom(null, async (get, set, user: User) => {
+//   if (!user) return;
+//   console.log("User:", user);
+
+//   const res = await fetch("http://localhost:5013/api/User", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       name: user.name,
+//       email: user.email,
+//       phone: user.phone,
+//       password: user.password,
+//       chosenDefaultPreferences: user.chosenDefaultPreferences,
+//       userDefinedPreferences: user.userDefinedPreferences,
+//       starredMovies: user.starredMovies,
+//       profilePicture: user.profilePicture,
+//       birthday: user.birthday,
+//       gender: user.gender,
+//       favoriteDirectors: user.favoriteDirectors,
+//       favoriteActors: user.favoriteActors,
+//       religion: user.religion,
+//       countryOfBirth: user.countryOfBirth,
+//       countryOfResidence: user.countryOfResidence,
+//       politicalOrientation: user.politicalOrientation,
+//       sexualOrientation: user.sexualOrientation,
+//       secondLanguage: user.secondLanguage,
+//       favoriteAnimal: user.favoriteAnimal,
+//       firstLanguage: user.firstLanguage,
+//     }),
+//   });
+
+//   if (!res.ok) {
+//     const errorData = await res.json().catch(() => null);
+//     throw new Error(
+//       `HTTP error! status: ${res.status}${
+//         errorData ? ` - ${JSON.stringify(errorData)}` : ""
+//       }`
+//     );
+//   }
+
+//   const data = await res.json();
+//   console.log("User created successfully:", data);
+//   set(isUserCreatedAtom, true);
+// });
+
+// export const putUserAtom = atom(null, async (get) => {
+//   const user = get(newUserAtom);
+//   if (!user) return;
+//   const res = await fetch(`http://localhost:5013/api/User/${user.id}`, {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify(user),
+//   });
+//   if (!res.ok) {
+//     throw new Error(`HTTP error! status: ${res.status}`);
+//   }
+//   const data = await res.json();
+//   console.log(data);
+// });
+
+// export const deleteUserAtom = atom(async () => {
+//   const user = useAtomValue(newUserAtom);
+//   if (!user) return;
+//   const res = await fetch(`http://localhost:5013/api/User/${user.id}`, {
+//     method: "DELETE",
+//   });
+//   if (!res.ok) {
+//     throw new Error(`HTTP error! status: ${res.status}`);
+//   }
+//   const data = await res.json();
+//   console.log(data);
+//   const setUserCreatedAtom = useSetAtom(isUserCreatedAtom);
+//   setUserCreatedAtom(false);
+//   const setNewUserAtom = useSetAtom(newUserAtom);
+//   setNewUserAtom(null);
+// });
+
+///////////////// DEFAULT CATEGORIES API CALLS //////////////////
 
 export const fetchDefaultCategoriesAtom = atom(null, async (get, set) => {
   const res = await fetch(`http://localhost:5013/api/DefaultCategory`, {
@@ -140,3 +220,23 @@ export const fetchDefaultCategoriesAtom = atom(null, async (get, set) => {
   set(defaultPreferencesAtom, categories);
   set(isDefaultCategoriesFetchedAtom, true);
 });
+
+/////////////////// TRENDING MOVIES API CALLS //////////////////
+
+export type TrendingMovie = {
+  imdbID: string;
+  title: string;
+  year: string;
+  genre: string;
+  rating: string;
+  poster: string;
+  director: string;
+  actors: string[];
+  plot: string;
+  language: string;
+  country: string;
+};
+
+export const trendingMoviesAtom = atom<TrendingMovie[]>([]);
+
+//////////////////

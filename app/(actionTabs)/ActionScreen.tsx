@@ -1,21 +1,19 @@
 import {
   SafeAreaView,
   View,
-  Text,
   Image,
   StyleSheet,
   type ImageSourcePropType,
+  TouchableOpacity,
 } from "react-native";
-import { useCallback, useRef } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Swiper, type SwiperCardRefType } from "rn-swiper-list";
 import ActionButton from "../../components/ActionButton";
 import SvgCancel from "../../assets//Icons/SvgCancel";
 import SvgRefresh from "../../assets/Icons/SvgRefresh";
-import SvgStar from "../../assets/Icons/SvgStar";
 import SvgHeart from "../../assets/Icons/SvgHeart";
-import { Box } from "@/components/ui/box";
 import SvgSaveCard from "../../assets/Icons/SvgSaveCard";
+import MovieCard from "@/components/MovieCard";
 const IMAGES: ImageSourcePropType[] = [
   require("../../assets/images/dummy1.png"),
   require("../../assets/images/dummy2.png"),
@@ -27,6 +25,11 @@ const IMAGES: ImageSourcePropType[] = [
 
 export default function ActionScreen() {
   const ref = useRef<SwiperCardRefType>();
+  const [cardIndex, setCardIndex] = useState<number | null>();
+  const [movie, setMovie] = useState<ImageSourcePropType | null>(null);
+  useEffect(() => {
+    setCardIndex(0);
+  }, []);
 
   const renderCard = useCallback((image: ImageSourcePropType) => {
     return (
@@ -76,45 +79,70 @@ export default function ActionScreen() {
     );
   }, []);
 
+  const handleOpenMovieCard = useCallback(
+    (cardIndex: number | null | undefined) => {
+      console.log("handleOpenMovieCard", cardIndex);
+      if (cardIndex === null || cardIndex === undefined) {
+        return;
+      }
+      const movie = IMAGES[cardIndex];
+      console.log("movie", cardIndex);
+      setMovie(movie);
+    },
+    []
+  );
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View style={styles.container}>
-        <View style={styles.subContainer}>
-          <Swiper
-            ref={ref}
-            cardStyle={styles.cardStyle}
-            data={IMAGES}
-            renderCard={renderCard}
-            onIndexChange={(index) => {
-              console.log("Current Active index", index);
-            }}
-            onSwipeRight={(cardIndex) => {
+        {movie && <MovieCard cardIndex={cardIndex ?? 0} movie={movie} />}
+        {!movie && (
+          <TouchableOpacity
+            className="flex-1 w-full"
+            onPress={() => {
+              console.log("onPress!!!!!!!!!!!!!");
               console.log("cardIndex", cardIndex);
+              handleOpenMovieCard(cardIndex);
             }}
-            onSwipedAll={() => {
-              console.log("onSwipedAll");
-            }}
-            onSwipeLeft={(cardIndex) => {
-              console.log("onSwipeLeft", cardIndex);
-            }}
-            onSwipeTop={(cardIndex) => {
-              console.log("onSwipeTop", cardIndex);
-            }}
-            OverlayLabelRight={OverlayLabelRight}
-            OverlayLabelLeft={OverlayLabelLeft}
-            OverlayLabelTop={OverlayLabelTop}
-            onSwipeActive={() => {
-              console.log("onSwipeActive");
-            }}
-            onSwipeStart={() => {
-              console.log("onSwipeStart");
-            }}
-            onSwipeEnd={() => {
-              console.log("onSwipeEnd");
-            }}
-          />
-        </View>
-
+          >
+            <View style={styles.subContainer}>
+              <Swiper
+                ref={ref}
+                cardStyle={styles.cardStyle}
+                data={IMAGES}
+                renderCard={renderCard}
+                onIndexChange={(index) => {
+                  console.log("Current Active index", index);
+                  setCardIndex(index);
+                }}
+                onSwipeRight={(cardIndex) => {
+                  console.log("cardIndex", cardIndex);
+                }}
+                onSwipedAll={() => {
+                  console.log("onSwipedAll");
+                }}
+                onSwipeLeft={(cardIndex) => {
+                  console.log("onSwipeLeft", cardIndex);
+                }}
+                onSwipeTop={(cardIndex) => {
+                  console.log("onSwipeTop", cardIndex);
+                }}
+                OverlayLabelRight={OverlayLabelRight}
+                OverlayLabelLeft={OverlayLabelLeft}
+                OverlayLabelTop={OverlayLabelTop}
+                onSwipeActive={() => {
+                  console.log("onSwipeActive");
+                }}
+                onSwipeStart={() => {
+                  console.log("onSwipeStart");
+                }}
+                onSwipeEnd={() => {
+                  console.log("onSwipeEnd");
+                }}
+              />
+            </View>
+          </TouchableOpacity>
+        )}
         <View style={styles.buttonsContainer}>
           <ActionButton
             style={styles.button}
@@ -167,7 +195,7 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: "row",
-    bottom: 80,
+    bottom: 30,
     alignItems: "center",
     justifyContent: "flex-start",
   },
