@@ -1,5 +1,8 @@
 import { User } from "@/components/GlobalStore";
 import axios from "axios";
+import { TrendingMovie, trendingMoviesAtom } from "@/components/GlobalStore";
+import { useSetAtom } from "jotai";
+import { MovieResponse, Movie } from "../types/movie";
 
 export async function postUser(user: User) {
   const response = await axios.post(
@@ -82,5 +85,18 @@ export async function getDropdownOptions() {
       genders: [],
       languages: [],
     };
+  }
+}
+
+export async function getTrendingMoviesDirect(
+  setMovies: (movies: Movie[]) => void
+) {
+  try {
+    const response = await axios.get<MovieResponse>(
+      "http://localhost:5013/api/MoviePack/getmoviesdirect"
+    );
+    setMovies(response.data.results);
+  } catch (error) {
+    console.error(error);
   }
 }

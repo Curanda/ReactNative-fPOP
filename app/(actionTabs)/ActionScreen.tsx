@@ -14,22 +14,26 @@ import SvgRefresh from "../../assets/Icons/SvgRefresh";
 import SvgHeart from "../../assets/Icons/SvgHeart";
 import SvgSaveCard from "../../assets/Icons/SvgSaveCard";
 import MovieCard from "@/components/MovieCard";
-const IMAGES: ImageSourcePropType[] = [
-  require("../../assets/images/dummy1.png"),
-  require("../../assets/images/dummy2.png"),
-  require("../../assets/images/dummy3.png"),
-  require("../../assets/images/dummy4.png"),
-  require("../../assets/images/dummy5.png"),
-  require("../../assets/images/dummy6.png"),
-];
+import { useAtomValue, useSetAtom } from "jotai";
+import { trendingMoviesAtom } from "@/components/GlobalStore";
+import { getTrendingMoviesDirect } from "@/utilities/api-functions";
+import { Movie } from "@/types/movie";
 
 export default function ActionScreen() {
   const ref = useRef<SwiperCardRefType>();
   const [cardIndex, setCardIndex] = useState<number | null>();
-  const [movie, setMovie] = useState<ImageSourcePropType | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const trendingMovies = useAtomValue(trendingMoviesAtom);
+  const setMovies = useSetAtom(trendingMoviesAtom);
+
   useEffect(() => {
+    getTrendingMoviesDirect(setMovies);
     setCardIndex(0);
   }, []);
+
+  const IMAGES: ImageSourcePropType[] = trendingMovies.map((movie) => ({
+    uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+  }));
 
   const renderCard = useCallback((image: ImageSourcePropType) => {
     return (
@@ -81,73 +85,72 @@ export default function ActionScreen() {
 
   const handleOpenMovieCard = useCallback(
     (cardIndex: number | null | undefined) => {
-      console.log("handleOpenMovieCard", cardIndex);
       if (cardIndex === null || cardIndex === undefined) {
         return;
       }
-      const movie = IMAGES[cardIndex];
-      console.log("movie", cardIndex);
-      setMovie(movie);
+      const movie = trendingMovies[cardIndex];
+      setSelectedMovie(movie);
     },
-    []
+    [trendingMovies]
   );
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View style={styles.container}>
-        {movie && <MovieCard cardIndex={cardIndex ?? 0} movie={movie} />}
-        {!movie && (
-          <TouchableOpacity
-            className="flex-1 w-full"
-            onPress={() => {
-              console.log("onPress!!!!!!!!!!!!!");
-              console.log("cardIndex", cardIndex);
-              handleOpenMovieCard(cardIndex);
-            }}
-          >
-            <View style={styles.subContainer}>
-              <Swiper
-                ref={ref}
-                cardStyle={styles.cardStyle}
-                data={IMAGES}
-                renderCard={renderCard}
-                onIndexChange={(index) => {
-                  console.log("Current Active index", index);
-                  setCardIndex(index);
-                }}
-                onSwipeRight={(cardIndex) => {
-                  console.log("cardIndex", cardIndex);
-                }}
-                onSwipedAll={() => {
-                  console.log("onSwipedAll");
-                }}
-                onSwipeLeft={(cardIndex) => {
-                  console.log("onSwipeLeft", cardIndex);
-                }}
-                onSwipeTop={(cardIndex) => {
-                  console.log("onSwipeTop", cardIndex);
-                }}
-                OverlayLabelRight={OverlayLabelRight}
-                OverlayLabelLeft={OverlayLabelLeft}
-                OverlayLabelTop={OverlayLabelTop}
-                onSwipeActive={() => {
-                  console.log("onSwipeActive");
-                }}
-                onSwipeStart={() => {
-                  console.log("onSwipeStart");
-                }}
-                onSwipeEnd={() => {
-                  console.log("onSwipeEnd");
-                }}
-              />
-            </View>
-          </TouchableOpacity>
+        {selectedMovie && (
+          <MovieCard cardIndex={cardIndex ?? 0} movie={selectedMovie} />
         )}
+
+        <TouchableOpacity
+          className="flex-1 w-full"
+          onPress={() => {
+            handleOpenMovieCard(cardIndex);
+          }}
+        >
+          <View style={styles.subContainer}>
+            <Swiper
+              ref={ref}
+              cardStyle={styles.cardStyle}
+              data={IMAGES}
+              renderCard={renderCard}
+              onIndexChange={(index) => {
+                console.log("Current Active index", index);
+                setCardIndex(index);
+              }}
+              onSwipeRight={(cardIndex) => {
+                console.log("cardIndex", cardIndex);
+              }}
+              onSwipedAll={() => {
+                console.log("onSwipedAll");
+              }}
+              onSwipeLeft={(cardIndex) => {
+                console.log("onSwipeLeft", cardIndex);
+              }}
+              onSwipeTop={(cardIndex) => {
+                console.log("onSwipeTop", cardIndex);
+              }}
+              OverlayLabelRight={OverlayLabelRight}
+              OverlayLabelLeft={OverlayLabelLeft}
+              OverlayLabelTop={OverlayLabelTop}
+              onSwipeActive={() => {
+                console.log("onSwipeActive");
+              }}
+              onSwipeStart={() => {
+                console.log("onSwipeStart");
+              }}
+              onSwipeEnd={() => {
+                console.log("onSwipeEnd");
+              }}
+            />
+          </View>
+        </TouchableOpacity>
+
         <View style={styles.buttonsContainer}>
           <ActionButton
             style={styles.button}
             onTap={() => {
               ref.current?.swipeBack();
+              setSelectedMovie(null);
             }}
           >
             <SvgRefresh
@@ -161,6 +164,7 @@ export default function ActionScreen() {
             style={styles.button}
             onTap={() => {
               ref.current?.swipeLeft();
+              setSelectedMovie(null);
             }}
           >
             <SvgCancel width={32} height={32} />
@@ -169,6 +173,7 @@ export default function ActionScreen() {
             style={styles.button}
             onTap={() => {
               ref.current?.swipeTop();
+              setSelectedMovie(null);
             }}
           >
             <SvgSaveCard width={32} height={32} fill="#26A9FF" />
@@ -177,6 +182,7 @@ export default function ActionScreen() {
             style={styles.button}
             onTap={() => {
               ref.current?.swipeRight();
+              setSelectedMovie(null);
             }}
           >
             <SvgHeart width={32} height={32} fill="#23E1A1" />

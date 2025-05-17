@@ -1,5 +1,6 @@
 import axios from "axios";
 import { atom, useAtomValue, useSetAtom } from "jotai";
+import { Movie } from "../types/movie";
 
 export const isPhoneValidAtom = atom(false);
 export const isCodeValidAtom = atom(false);
@@ -223,20 +224,9 @@ export const fetchDefaultCategoriesAtom = atom(null, async (get, set) => {
 
 /////////////////// TRENDING MOVIES API CALLS //////////////////
 
-export type TrendingMovie = {
-  imdbID: string;
-  title: string;
-  year: string;
-  genre: string;
-  rating: string;
-  poster: string;
-  director: string;
-  actors: string[];
-  plot: string;
-  language: string;
-  country: string;
-};
+export type TrendingMovie = Movie;
 
-export const trendingMoviesAtom = atom<TrendingMovie[]>([]);
+export const trendingMoviesAtom = atom<Movie[]>([]);
 
 //////////////////
+// https://image.tmdb.org/t/p/w500/FHHfHcUgGAxziP1C3lLt0q2T4s.jpg

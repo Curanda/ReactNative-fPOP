@@ -279,7 +279,7 @@ export default function ProfileScreen() {
                         </Button>
                       </HStack>
                     )}
-                    <Divider c />
+                    <Divider />
                     {editing === "phone" ? (
                       <HStack className="gap-4 items-center justify-between py-4 pl-4">
                         <TextInput

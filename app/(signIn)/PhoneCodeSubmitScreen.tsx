@@ -14,6 +14,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { router } from "expo-router";
 import React from "react";
+import { getTrendingMoviesDirect } from "@/utilities/api-functions";
 
 const codeSchema = Yup.object({
   code: Yup.array()
@@ -23,12 +24,13 @@ const codeSchema = Yup.object({
 
 export default function PhoneCodeSubmitScreen() {
   const validUser = useAtomValue(validUserAtom);
-  function handleSubmit(values: { code: string[] }) {
+  async function handleSubmit(values: { code: string[] }) {
     if (validUser?.chosenDefaultPreferences === null) {
       validUser.chosenDefaultPreferences = [];
     }
 
     if (values.code.join("") === "1234") {
+      // await getTrendingMoviesDirect();
       router.navigate("/(actionTabs)/ProfileScreen");
     }
   }
@@ -48,15 +50,7 @@ export default function PhoneCodeSubmitScreen() {
         validateOnBlur={false}
         validateOnChange={false}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          isValid,
-          setFieldValue,
-        }) => (
+        {({ handleSubmit, values, errors, setFieldValue }) => (
           <>
             <View className="flex-1 items-center justify-start">
               <Image

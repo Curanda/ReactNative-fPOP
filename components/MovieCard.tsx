@@ -6,9 +6,10 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Divider } from "react-native-paper";
 import { Chip } from "react-native-paper";
+import { Movie } from "@/types/movie";
 interface MovieCardProps {
   cardIndex: number;
-  movie: ImageSourcePropType | null;
+  movie: Movie | null;
 }
 
 export default function MovieCard({ cardIndex, movie }: MovieCardProps) {
@@ -36,25 +37,28 @@ export default function MovieCard({ cardIndex, movie }: MovieCardProps) {
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
         }}
-        source={movie}
+        source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
       />
       <View className="flex-col justify-start items-start w-full pt-4 pl-4">
         <Text className="text-black text-2xl font-bold">
-          Movie {cardIndex}
+          Movie {movie.title}
           {"  "}
-          <Text className="text-gray-300 text-2xl font-bold">2005</Text>
+          <Text className="text-gray-300 text-2xl font-bold">
+            {movie.release_date}
+          </Text>
         </Text>
 
         <View className="flex-row justify-start items-center w-full mt-2">
           <FontAwesome6 name="house" size={16} color="#D9D9D9" />
           <Text className="text-black text-sm font-normal ml-2">
-            Made in USA
+            Language: {movie.original_language.toUpperCase()}
           </Text>
         </View>
         <View className="flex-row justify-start items-center w-full mt-1">
           <MaterialIcons name="scoreboard" size={18} color="#D9D9D9" />
           <Text className="text-black text-sm font-normal ml-2">
-            Rotten Tomatoes 92%
+            Rotten Tomatoes score:{" "}
+            {(Number(movie.vote_average) * 10).toFixed(1)}%
           </Text>
         </View>
       </View>
@@ -70,8 +74,7 @@ export default function MovieCard({ cardIndex, movie }: MovieCardProps) {
       <Card.Content>
         <Text className="text-black text-md py-2 font-normal">Synopsis</Text>
         <Text className="text-gray-600 text-sm font-normal">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
-          quos. Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          {movie.overview}
         </Text>
       </Card.Content>
       <Divider
