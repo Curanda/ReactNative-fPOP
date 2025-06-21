@@ -201,9 +201,10 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: "row",
-    bottom: 30,
+    bottom: 60,
     alignItems: "center",
     justifyContent: "flex-start",
+    position: "fixed",
   },
   button: {
     height: 60,

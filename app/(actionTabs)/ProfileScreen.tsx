@@ -79,41 +79,45 @@ export default function ProfileScreen() {
   // ------------------------------------------------------------ PREFERENCES
 
   const defaultPreferences = useAtomValue(defaultPreferencesAtom);
-  const setUserPreferencesAtom = useSetAtom(userPreferencesAtom);
-  const [userPreferences, setUserPreferences] = useState<string[]>([]);
   const [newPreference, setNewPreference] = useState<string>("");
-  const [customPreferences, setCustomPreferences] = useState<string[]>([]);
 
   function handleTogglePreference(preference: string) {
-    console.log(preference);
-    if (userPreferences.includes(preference)) {
-      setUserPreferences((prevPreferences) =>
-        prevPreferences.filter((p) => p !== preference)
-      );
-    } else {
-      setUserPreferences((prevPreferences) => [...prevPreferences, preference]);
-    }
-    console.log("preferences updated:", userPreferences);
+    setUserData((prev) => {
+      if (!prev) return null;
+      const currentPreferences = prev.chosenDefaultPreferences || [];
+      const newPreferences = currentPreferences.includes(preference)
+        ? currentPreferences.filter((p) => p !== preference)
+        : [...currentPreferences, preference];
+      return { ...prev, chosenDefaultPreferences: newPreferences };
+    });
   }
 
-  const handleFinalize = () => {
-    setUserPreferencesAtom([...userPreferences, ...customPreferences]);
-    console.log("chosen preferences:", userPreferences, customPreferences);
-  };
-
   const handleDeleteCustomPreference = (preference: string) => {
-    setCustomPreferences((prev) => prev.filter((p) => p !== preference));
+    setUserData((prev) => {
+      if (!prev) return null;
+      const currentPrefs = prev.userDefinedPreferences || [];
+      return {
+        ...prev,
+        userDefinedPreferences: currentPrefs.filter((p) => p !== preference),
+      };
+    });
   };
 
   useEffect(() => {
-    if (
-      newPreference &&
-      !defaultPreferences.includes(newPreference) &&
-      !customPreferences.includes(newPreference)
-    ) {
-      setCustomPreferences((prev) => [...prev, newPreference]);
+    if (newPreference && !defaultPreferences.includes(newPreference)) {
+      setUserData((prev) => {
+        if (!prev) return null;
+        const customPrefs = prev.userDefinedPreferences || [];
+        if (!customPrefs.includes(newPreference)) {
+          return {
+            ...prev,
+            userDefinedPreferences: [...customPrefs, newPreference],
+          };
+        }
+        return prev;
+      });
     }
-  }, [newPreference]);
+  }, [newPreference, defaultPreferences, setUserData]);
 
   // ------------------------------------------------------------ EDIT PROFILE
 
@@ -141,6 +145,11 @@ export default function ProfileScreen() {
         return updated;
       });
     }
+    setEditing("");
+    setEditedValue("");
+  };
+
+  const cancelEdit = () => {
     setEditing("");
     setEditedValue("");
   };
@@ -189,18 +198,15 @@ export default function ProfileScreen() {
                       value={editedValue}
                       returnKeyType="done"
                     />
-                    ///111111111
                     <View className="flex-row justify-center items-center">
                       <Button
-                        onTouchStart={() => submitEdit}
+                        onTouchStart={submitEdit}
                         className="rounded-full px-[5px] ml-2 bg-white border border-black"
                       >
                         <Feather name="check" size={24} color="black" />
                       </Button>
                       <Button
-                        onTouchStart={() => {
-                          setEditing("");
-                        }}
+                        onTouchStart={cancelEdit}
                         className="rounded-full px-[5px] mx-4 bg-white border border-black"
                       >
                         <Feather name="x" size={24} color="black" />
@@ -254,9 +260,7 @@ export default function ProfileScreen() {
                             <Feather name="check" size={24} color="black" />
                           </Button>
                           <Button
-                            onTouchStart={() => {
-                              setEditing("");
-                            }}
+                            onTouchStart={cancelEdit}
                             className="rounded-full px-[5px] mx-4 bg-white border border-black"
                           >
                             <Feather name="x" size={24} color="black" />
@@ -301,9 +305,7 @@ export default function ProfileScreen() {
                             <Feather name="check" size={24} color="black" />
                           </Button>
                           <Button
-                            onTouchStart={() => {
-                              setEditing("");
-                            }}
+                            onTouchStart={cancelEdit}
                             className="rounded-full px-[5px] mx-4 bg-white border border-black"
                           >
                             <Feather name="x" size={24} color="black" />
@@ -356,9 +358,7 @@ export default function ProfileScreen() {
                             <Feather name="check" size={24} color="black" />
                           </Button>
                           <Button
-                            onTouchStart={() => {
-                              setEditing("");
-                            }}
+                            onTouchStart={cancelEdit}
                             className="rounded-full px-[5px] mx-4 bg-white border border-black"
                           >
                             <Feather name="x" size={24} color="black" />

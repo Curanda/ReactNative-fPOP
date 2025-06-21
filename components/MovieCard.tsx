@@ -22,7 +22,7 @@ export default function MovieCard({ cardIndex, movie }: MovieCardProps) {
         backgroundColor: "#F5F5F5",
         marginBottom: 50,
         width: "90%",
-        height: "85%",
+        height: "90%",
         borderRadius: 20,
         alignContent: "space-between",
         justifyContent: "space-between",
