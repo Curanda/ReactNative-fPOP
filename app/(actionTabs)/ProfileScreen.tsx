@@ -34,6 +34,7 @@ import {
 } from "@/components/GlobalStore";
 import { useAtomValue, useSetAtom } from "jotai";
 import { updateUser } from "@/utilities/api-functions";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const defaultProfilePicture =
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.pngfind.com%2Fpngs%2Fm%2F610-6104451_image-placeholder-png-user-profile-placeholder-image-png.png&f=1&nofb=1&ipt=d42742362f627ab50378d1c50487e256c046c11cca1ba05c36ad52cae9a59192";
@@ -123,6 +124,8 @@ export default function ProfileScreen() {
 
   const [editing, setEditing] = useState<keyof User | "">("");
   const [editedValue, setEditedValue] = useState<string>("");
+  const [editedBirthday, setEditedBirthday] = useState<string>("");
+
   const passwordDigits = () => {
     if (!userData) return "";
     let digits = "";
@@ -133,25 +136,46 @@ export default function ProfileScreen() {
   };
 
   const submitEdit = () => {
-    if (editing && editedValue !== "") {
-      console.log("Updating user data:", { editing, editedValue });
+    if (editing) {
       setUserData((prev) => {
         if (!prev) return null;
-        const updated = {
-          ...prev,
-          [editing]: editedValue,
-        } as User;
-        console.log("New user data:", updated);
+        const updated = { ...prev };
+        if (editing === "name" && editedValue !== "") {
+          updated.name = editedValue;
+        }
+        if (editing === "name" && editedBirthday !== "") {
+          updated.birthday = editedBirthday;
+        } else if (editing !== "name" && editedValue !== "") {
+          updated[editing as keyof User] = editedValue as any;
+        }
         return updated;
       });
     }
     setEditing("");
     setEditedValue("");
+    setEditedBirthday("");
   };
 
   const cancelEdit = () => {
     setEditing("");
     setEditedValue("");
+    setEditedBirthday("");
+  };
+
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date: Date) => {
+    console.log("A date has been picked: ", date);
+    setEditedBirthday(date.toISOString().split("T")[0]);
+    hideDatePicker();
   };
 
   return (
@@ -183,21 +207,43 @@ export default function ProfileScreen() {
                   </Button>
                 </Box>
                 {editing === "name" ? (
-                  <HStack className="gap-2">
-                    <TextInput
-                      className="text-lg font-bold font-[montserrat]"
-                      maxLength={20}
-                      placeholder={userData?.name || ""}
-                      keyboardType="default"
-                      autoCapitalize="words"
-                      autoComplete="name"
-                      autoCorrect={true}
-                      onChangeText={(text) => {
-                        setEditedValue(text);
-                      }}
-                      value={editedValue}
-                      returnKeyType="done"
-                    />
+                  <VStack className="gap-4 items-center">
+                    <HStack className="gap-2 items-center">
+                      <TextInput
+                        className="text-lg font-bold font-[montserrat]"
+                        maxLength={20}
+                        placeholder={userData?.name || ""}
+                        keyboardType="default"
+                        autoCapitalize="words"
+                        autoComplete="name"
+                        autoCorrect={true}
+                        onChangeText={(text) => {
+                          setEditedValue(text);
+                        }}
+                        value={editedValue}
+                        returnKeyType="done"
+                      />
+                    </HStack>
+                    <HStack className="gap-2 items-center">
+                      <TextInput
+                        className="text-lg font-bold font-[montserrat]"
+                        maxLength={10}
+                        onTouchStart={showDatePicker}
+                        placeholder={
+                          userData?.birthday || editedBirthday || "YYYY-MM-DD"
+                        }
+                        editable={false}
+                        value={editedBirthday}
+                        returnKeyType="done"
+                      />
+                      <DateTimePickerModal
+                        isVisible={isDatePickerVisible}
+                        mode="date"
+                        locale="sv_SE"
+                        onConfirm={handleConfirm}
+                        onCancel={hideDatePicker}
+                      />
+                    </HStack>
                     <View className="flex-row justify-center items-center">
                       <Button
                         onTouchStart={submitEdit}
@@ -212,7 +258,7 @@ export default function ProfileScreen() {
                         <Feather name="x" size={24} color="black" />
                       </Button>
                     </View>
-                  </HStack>
+                  </VStack>
                 ) : (
                   <HStack className="gap-4 items-center">
                     <Text className="text-2xl font-bold font-[montserrat]">
