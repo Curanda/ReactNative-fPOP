@@ -148,6 +148,9 @@ export default function ProfileScreen() {
         } else if (editing !== "name" && editedValue !== "") {
           updated[editing as keyof User] = editedValue as any;
         }
+        if (editing === "profilePicture" && editedValue !== "") {
+          updated.profilePicture = editedValue;
+        }
         return updated;
       });
     }
@@ -188,24 +191,58 @@ export default function ProfileScreen() {
           <SafeAreaView className="bg-white">
             <VStack space="xs">
               <Center className="h-auto w-full bg-white gap-4 pt-12">
-                <Box className="flex justify-center items-center relative">
-                  <Image
-                    alt="Profile Picture"
-                    source={{
-                      uri: userData?.profilePicture || defaultProfilePicture,
-                    }}
-                    className="w-32 h-32 rounded-full border border-gray-500"
-                  />
-                  <Button
-                    onPress={() => {
-                      setEditing("profilePicture");
-                    }}
-                    className="absolute bottom-20 -right-2 rounded-full px-[5px]"
-                    variant="solid"
-                  >
-                    <EvilIcons name="pencil" size={24} color="white" />
-                  </Button>
-                </Box>
+                {editing === "profilePicture" ? (
+                  <VStack className="gap-4 items-center">
+                    <TextInput
+                      className="text-lg font-bold font-[montserrat]"
+                      maxLength={500}
+                      placeholder="Enter new picture URL"
+                      keyboardType="url"
+                      autoCapitalize="none"
+                      autoComplete="url"
+                      autoCorrect={true}
+                      onChangeText={(text) => {
+                        setEditedValue(text);
+                      }}
+                      value={editedValue}
+                      returnKeyType="done"
+                    />
+                    <View className="flex-row justify-center items-center">
+                      <Button
+                        onTouchStart={submitEdit}
+                        className="rounded-full px-[5px] ml-2 bg-white border border-black"
+                      >
+                        <Feather name="check" size={24} color="black" />
+                      </Button>
+                      <Button
+                        onTouchStart={cancelEdit}
+                        className="rounded-full px-[5px] mx-4 bg-white border border-black"
+                      >
+                        <Feather name="x" size={24} color="black" />
+                      </Button>
+                    </View>
+                  </VStack>
+                ) : (
+                  <Box className="flex justify-center items-center relative">
+                    <Image
+                      alt="Profile Picture"
+                      source={{
+                        uri: userData?.profilePicture || defaultProfilePicture,
+                      }}
+                      className="w-32 h-32 rounded-full border border-gray-500"
+                    />
+                    <Button
+                      onPress={() => {
+                        setEditing("profilePicture");
+                      }}
+                      className="absolute bottom-20 -right-2 rounded-full px-[5px]"
+                      variant="solid"
+                    >
+                      <EvilIcons name="pencil" size={24} color="white" />
+                    </Button>
+                  </Box>
+                )}
+
                 {editing === "name" ? (
                   <VStack className="gap-4 items-center">
                     <HStack className="gap-2 items-center">
@@ -329,7 +366,13 @@ export default function ProfileScreen() {
                         </Button>
                       </HStack>
                     )}
-                    <Divider />
+                    <Divider
+                      style={{
+                        height: 1,
+                        width: 300,
+                        backgroundColor: "black",
+                      }}
+                    />
                     {editing === "phone" ? (
                       <HStack className="gap-4 items-center justify-between py-4 pl-4">
                         <TextInput

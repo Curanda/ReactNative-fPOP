@@ -34,6 +34,7 @@ export default function ChipAddPreference({
         onChangeText={(text) => {
           setInputText(text);
         }}
+        returnKeyType="done"
       />
     </Chip>
   );
