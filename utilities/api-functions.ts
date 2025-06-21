@@ -89,14 +89,18 @@ export async function getDropdownOptions() {
 }
 
 export async function getTrendingMoviesDirect(
-  setMovies: (movies: Movie[]) => void
-) {
+  pageId: number
+): Promise<Movie[]> {
   try {
     const response = await axios.get<MovieResponse>(
-      "http://localhost:5013/api/MoviePack/getmoviesdirect"
+      "http://localhost:5013/api/MoviePack/getmoviesdirect",
+      {
+        params: { pageId },
+      }
     );
-    setMovies(response.data.results);
+    return response.data.results;
   } catch (error) {
     console.error(error);
+    return [];
   }
 }

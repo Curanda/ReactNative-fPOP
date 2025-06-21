@@ -228,5 +228,7 @@ export type TrendingMovie = Movie;
 
 export const trendingMoviesAtom = atom<Movie[]>([]);
 
+export const starredMoviesAtom = atom<Movie[]>([]);
+
 //////////////////
 // https://image.tmdb.org/t/p/w500/FHHfHcUgGAxziP1C3lLt0q2T4s.jpg

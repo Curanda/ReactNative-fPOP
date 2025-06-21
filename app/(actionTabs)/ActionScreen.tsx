@@ -15,7 +15,10 @@ import SvgHeart from "../../assets/Icons/SvgHeart";
 import SvgSaveCard from "../../assets/Icons/SvgSaveCard";
 import MovieCard from "@/components/MovieCard";
 import { useAtomValue, useSetAtom } from "jotai";
-import { trendingMoviesAtom } from "@/components/GlobalStore";
+import {
+  trendingMoviesAtom,
+  starredMoviesAtom,
+} from "@/components/GlobalStore";
 import { getTrendingMoviesDirect } from "@/utilities/api-functions";
 import { Movie } from "@/types/movie";
 
@@ -25,11 +28,32 @@ export default function ActionScreen() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const trendingMovies = useAtomValue(trendingMoviesAtom);
   const setMovies = useSetAtom(trendingMoviesAtom);
+  const starredMovies = useAtomValue(starredMoviesAtom);
+  const setStarredMovies = useSetAtom(starredMoviesAtom);
+  const [swipes, setSwipes] = useState(0);
+  const [pageId, setPageId] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    getTrendingMoviesDirect(setMovies);
-    setCardIndex(0);
-  }, []);
+    const fetchMovies = async () => {
+      if (isLoading) return;
+      setIsLoading(true);
+      const movies = await getTrendingMoviesDirect(pageId);
+      setMovies([...trendingMovies, ...movies]);
+      // setCardIndex(0);
+      setIsLoading(false);
+      console.log("trendingMovies from fetchMovies", trendingMovies.length);
+    };
+    fetchMovies();
+  }, [pageId]);
+
+  useEffect(() => {
+    console.log("trendingMovies from useEffect swipes", trendingMovies.length);
+    console.log("swipes from useEffect", swipes);
+    if (swipes === trendingMovies.length - 5) {
+      setPageId(pageId + 1);
+    }
+  }, [swipes]);
 
   const IMAGES: ImageSourcePropType[] = trendingMovies.map((movie) => ({
     uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
@@ -94,6 +118,11 @@ export default function ActionScreen() {
     [trendingMovies]
   );
 
+  const handleSwipeTop = (cardIndex: number) => {
+    const movie = trendingMovies[cardIndex];
+    setStarredMovies([...starredMovies, movie]);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View style={styles.container}>
@@ -115,6 +144,11 @@ export default function ActionScreen() {
               renderCard={renderCard}
               onIndexChange={(index) => {
                 console.log("Current Active index", index);
+                console.log(
+                  "trendingMovies from onIndexChange",
+                  trendingMovies.length
+                );
+                setSwipes(index);
                 setCardIndex(index);
               }}
               onSwipeRight={(cardIndex) => {
@@ -122,12 +156,17 @@ export default function ActionScreen() {
               }}
               onSwipedAll={() => {
                 console.log("onSwipedAll");
+                console.log(
+                  "trendingMovies from swiped all",
+                  trendingMovies.length
+                );
               }}
               onSwipeLeft={(cardIndex) => {
                 console.log("onSwipeLeft", cardIndex);
               }}
               onSwipeTop={(cardIndex) => {
                 console.log("onSwipeTop", cardIndex);
+                handleSwipeTop(cardIndex);
               }}
               OverlayLabelRight={OverlayLabelRight}
               OverlayLabelLeft={OverlayLabelLeft}
