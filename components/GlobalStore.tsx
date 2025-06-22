@@ -77,7 +77,7 @@ export type User = {
   password: string;
   chosenDefaultPreferences: string[];
   userDefinedPreferences: string[] | null;
-  starredMovies: string[];
+  starredMovies: number[];
   profilePicture: string | null;
   birthday: string;
   gender: string | null;

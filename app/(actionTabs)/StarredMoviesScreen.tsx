@@ -12,15 +12,11 @@ import ActionButton from "../../components/ActionButton";
 import SvgCancel from "../../assets//Icons/SvgCancel";
 import SvgRefresh from "../../assets/Icons/SvgRefresh";
 import SvgHeart from "../../assets/Icons/SvgHeart";
-import SvgSaveCard from "../../assets/Icons/SvgSaveCard";
 import MovieCard from "@/components/MovieCard";
 import { useAtomValue, useSetAtom } from "jotai";
-import {
-  trendingMoviesAtom,
-  starredMoviesAtom,
-} from "@/components/GlobalStore";
-import { getTrendingMoviesDirect } from "@/utilities/api-functions";
+import { starredMoviesAtom } from "@/components/GlobalStore";
 import { Movie } from "@/types/movie";
+import { validUserAtom, newUserAtom } from "@/components/GlobalStore";
 
 export default function StarredMoviesScreen() {
   const ref = useRef<SwiperCardRefType>();
@@ -28,6 +24,14 @@ export default function StarredMoviesScreen() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const starredMovies = useAtomValue(starredMoviesAtom);
   const setStarredMovies = useSetAtom(starredMoviesAtom);
+  const user =
+    useAtomValue(validUserAtom) === null
+      ? useAtomValue(newUserAtom)
+      : useAtomValue(validUserAtom);
+  const setUserData =
+    useAtomValue(validUserAtom) === null
+      ? useSetAtom(newUserAtom)
+      : useSetAtom(validUserAtom);
 
   useEffect(() => {
     setCardIndex(0);
@@ -176,7 +180,7 @@ export default function StarredMoviesScreen() {
           >
             <SvgCancel width={32} height={32} />
           </ActionButton>
-          <ActionButton
+          {/* <ActionButton
             style={styles.button}
             onTap={() => {
               ref.current?.swipeTop();
@@ -189,7 +193,7 @@ export default function StarredMoviesScreen() {
             }}
           >
             <SvgSaveCard width={32} height={32} fill="#26A9FF" />
-          </ActionButton>
+          </ActionButton> */}
           <ActionButton
             style={styles.button}
             onTap={() => {

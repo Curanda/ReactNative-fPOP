@@ -20,6 +20,7 @@ import {
   User,
   isUserCreatedAtom,
   newUserAtom,
+  starredMoviesAtom,
 } from "@/components/GlobalStore";
 import { ArchDivider } from "@/assets/arch-divider";
 import { Center } from "@/components/ui/center";
@@ -119,6 +120,11 @@ export default function ProfileScreen() {
       });
     }
   }, [newPreference, defaultPreferences, setUserData]);
+
+  // ------------------------------------------------------------ STARRED MOVIES
+
+  const setStarredMovies = useSetAtom(starredMoviesAtom);
+  // setStarredMovies(userData?.starredMovies || []);
 
   // ------------------------------------------------------------ EDIT PROFILE
 

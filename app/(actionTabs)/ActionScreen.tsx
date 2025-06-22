@@ -18,9 +18,12 @@ import { useAtomValue, useSetAtom } from "jotai";
 import {
   trendingMoviesAtom,
   starredMoviesAtom,
+  validUserAtom,
+  newUserAtom,
 } from "@/components/GlobalStore";
-import { getTrendingMoviesDirect } from "@/utilities/api-functions";
+import { getTrendingMoviesDirect, updateUser } from "@/utilities/api-functions";
 import { Movie } from "@/types/movie";
+import { User } from "@/components/GlobalStore";
 
 export default function ActionScreen() {
   const ref = useRef<SwiperCardRefType>();
@@ -33,6 +36,14 @@ export default function ActionScreen() {
   const [swipes, setSwipes] = useState(0);
   const [pageId, setPageId] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const user =
+    useAtomValue(validUserAtom) === null
+      ? useAtomValue(newUserAtom)
+      : useAtomValue(validUserAtom);
+  const setUserData =
+    useAtomValue(validUserAtom) === null
+      ? useSetAtom(newUserAtom)
+      : useSetAtom(validUserAtom);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -50,10 +61,25 @@ export default function ActionScreen() {
   useEffect(() => {
     console.log("trendingMovies from useEffect swipes", trendingMovies.length);
     console.log("swipes from useEffect", swipes);
-    if (swipes === trendingMovies.length - 5) {
+    if (swipes === trendingMovies.length - 10) {
       setPageId(pageId + 1);
     }
   }, [swipes]);
+
+  useEffect(() => {
+    const updateUserWithStarredMovies = async () => {
+      if (user) {
+        const newStarredMovies = starredMovies.map((movie) => movie.id);
+        user.starredMovies = [
+          ...new Set([...user.starredMovies, ...newStarredMovies]),
+        ];
+        setUserData(user);
+      }
+      const res = await updateUser(user as User);
+      console.log("user with starred movies", res);
+    };
+    updateUserWithStarredMovies();
+  }, [starredMovies]);
 
   const IMAGES: ImageSourcePropType[] = trendingMovies.map((movie) => ({
     uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,

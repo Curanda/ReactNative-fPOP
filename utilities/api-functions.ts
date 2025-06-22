@@ -1,6 +1,10 @@
 import { User } from "@/components/GlobalStore";
 import axios from "axios";
-import { TrendingMovie, trendingMoviesAtom } from "@/components/GlobalStore";
+import {
+  TrendingMovie,
+  trendingMoviesAtom,
+  starredMoviesAtom,
+} from "@/components/GlobalStore";
 import { useSetAtom } from "jotai";
 import { MovieResponse, Movie } from "../types/movie";
 
@@ -37,6 +41,16 @@ export async function deleteUser(id: number) {
 export async function getUserByPhone(phone: string) {
   const response = await axios.get(
     `http://localhost:5013/api/User/phone/${phone}`
+  );
+  return response.data;
+}
+
+export async function getMoviesByIds(starredMoviesIds: number[]) {
+  const response = await axios.get(
+    `http://localhost:5013/api/MoviePack/getstarredmovies`,
+    {
+      params: { starredMoviesIds },
+    }
   );
   return response.data;
 }
